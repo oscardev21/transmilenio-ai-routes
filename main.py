@@ -1,7 +1,7 @@
 import heapq
 
 # Grafo con estaciones y conexiones (tiempos en minutos)
-graph = {
+grafo = {
     "MA": {"PE": (3, "Sur"), "PS": (4, "Sur")},        # Madelena
     "PE": {"MA": (3, "Sur"), "VE": (2, "Sur")},
     "VE": {"PE": (2, "Sur"), "GS": (4, "Sur")},
@@ -13,38 +13,38 @@ graph = {
 }
 
 # Heurística: estimación simple de tiempo restante (valores ficticios)
-heuristic = {
+heuristica = {
     "MA": 40, "PE": 37, "VE": 35, "PS": 38,
     "GS": 30, "BA": 20, "JI": 10, "20J": 0
 }
 
 # Penalización por cambio de troncal
-PENALIZACION_TRANSFERENCIA = 5
+PENALIZACION_CAMBIO_TRONCAL = 5
 
-def a_star_search(start, goal):
-    open_list = []
-    heapq.heappush(open_list, (0, start, [], 0, None))  
-    closed_set = set()
+def busqueda_a_estrella(inicio, destino):
+    lista_abierta = []
+    heapq.heappush(lista_abierta, (0, inicio, [], 0, None))  
+    conjunto_cerrado = set()
 
-    while open_list:
-        f, current, path, g, last_line = heapq.heappop(open_list)
+    while lista_abierta:
+        f, actual, ruta, g, ultima_linea = heapq.heappop(lista_abierta)
 
-        if current in closed_set:
+        if actual in conjunto_cerrado:
             continue
-        closed_set.add(current)
+        conjunto_cerrado.add(actual)
 
-        path = path + [current]
+        ruta = ruta + [actual]
 
-        if current == goal:
-            return path, g
+        if actual == destino:
+            return ruta, g
 
-        for neighbor, (time, line) in graph[current].items():
-            new_g = g + time
-            if last_line and last_line != line:
-                new_g += PENALIZACION_TRANSFERENCIA  
+        for vecino, (tiempo, linea) in grafo[actual].items():
+            nuevo_g = g + tiempo
+            if ultima_linea and ultima_linea != linea:
+                nuevo_g += PENALIZACION_CAMBIO_TRONCAL  
 
-            f = new_g + heuristic.get(neighbor, 0)
-            heapq.heappush(open_list, (f, neighbor, path, new_g, line))
+            f = nuevo_g + heuristica.get(vecino, 0)
+            heapq.heappush(lista_abierta, (f, vecino, ruta, nuevo_g, linea))
 
     return None, float("inf")
 
@@ -58,5 +58,5 @@ if __name__ == "__main__":
     ]
 
     for inicio, fin in casos:
-        ruta, tiempo = a_star_search(inicio, fin)
+        ruta, tiempo = busqueda_a_estrella(inicio, fin)
         print(f"Ruta de {inicio} a {fin}: {ruta} - Tiempo estimado: {tiempo} minutos")
